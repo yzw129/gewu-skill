@@ -1,0 +1,25 @@
+{
+  "rule_id": "R001",
+  "question": "这条规则帮助解决什么科研决策？",
+  "statement": "科研方法或研究判断规则（不是未经核查的共识）",
+  "condition": "适用的任务与数据条件",
+  "action": "可操作的方法或实验设计",
+  "rationale": "文献证据或明确标注的机制假设",
+  "kind": "recommendation",
+  "status": "candidate",
+  "evidence": [
+    {
+      "paper_id": "replace-id",
+      "locator": "Section 3 / Fig. 2",
+      "summary": "忠实复述证据",
+      "source_part": "results",
+      "review_status": "unchecked"
+    }
+  ],
+  "counterexamples": [],
+  "counterexample_search": {
+    "status": "not_started",
+    "notes": ""
+  },
+  "limits": "失效条件、遗漏变量以及不能直接推断的内容"
+}

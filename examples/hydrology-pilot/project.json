@@ -1,0 +1,41 @@
+{
+  "schema_version": "0.2",
+  "project_id": "hydrology-physics-guided-pilot",
+  "topic": "物理引导降雨径流模拟及其在资料稀缺和极端洪水下的泛化能力",
+  "scope": "降雨径流过程、产流与汇流结构，跨流域与河网研究；不以期刊为文献筛选条件",
+  "objective": "检验 Gewu 能否从真实论文中提炼科学问题、实验对照与适用边界",
+  "protocol": {
+    "frozen": false,
+    "frozen_at": null,
+    "sources": [],
+    "queries": [],
+    "date_range": [
+      null,
+      null
+    ],
+    "inclusion": [],
+    "exclusion": [],
+    "sampling_strategy": "经典论文、近期研究、相反证据与不同方法均应覆盖",
+    "notes": ""
+  },
+  "evaluation": {
+    "holdout_ids": [],
+    "frozen": false,
+    "frozen_at": null,
+    "metrics": [
+      "claim_support_rate",
+      "factual_error_rate",
+      "counterexample_handling",
+      "actionability"
+    ],
+    "comparison": [
+      "base_llm",
+      "direct_retrieval",
+      "gewu_skill"
+    ]
+  },
+  "resources": [],
+  "known_limitations": [
+    "未开始文献检索、论文解析与规则归纳"
+  ]
+}
