@@ -17,7 +17,7 @@ SKILL_ROOT = HERE.parent
 TEMPLATES = SKILL_ROOT / 'templates'
 ACCESS_LEVELS = {'metadata': 0, 'abstract': 1, 'fulltext': 2}
 PART_LEVELS = {'metadata': 0, 'abstract': 1, 'introduction': 2, 'methods': 2,
-               'results': 2, 'discussion': 2, 'conclusion': 2, 'supplementary': 2}
+               'results': 2, 'discussion': 2, 'conclusion': 2, 'supplementary': 2, 'other': 2, 'references': 2}
 KINDS = {'fact', 'interpretation', 'hypothesis', 'recommendation'}
 STATUSES = {'candidate', 'reviewed', 'tested'}
 SEARCH_STATUSES = {'not_started', 'searched', 'not_applicable'}
@@ -225,7 +225,7 @@ def audit(directory):
 
 def print_audit(directory):
     errors, warnings, _, _, _ = audit(directory)
-    print(f'GEWU v0.2 结构检查：{len(errors)} 错误，{len(warnings)} 提醒')
+    print(f'GEWU v0.3 结构检查：{len(errors)} 错误，{len(warnings)} 提醒')
     for e in errors:
         print('ERROR', e)
     for w in warnings:

@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+.pytest_cache/
+# Per-research copyrighted input/output; explicitly review before sharing.
+**/corpus/
+**/extracts/
+**/analysis/
+**/generated_skill/
+**/*.pdf
