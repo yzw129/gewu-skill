@@ -1,8 +1,8 @@
-# Gewu Skills · 格物（Research Edition v0.3）
+# Gewu Skills · 格物（Research Edition v0.4）
 
 > **目标：科研方向蒸馏。** 方向文献 → 带页码的 PDF 证据 → 科研问题/方法候选 → 跨论文证据比较 → 有条件的候选规则 → 人工核对 → 方向专属 Skill。期刊选择在研究贡献形成之后。
 
-**v0.3 已实现：** 使用 PyMuPDF 读取**用户合法获取的本地文字型 PDF**，保存页码、段落编号、文本哈希和 PDF 文件哈希；从原文中筛选对应科研要素的候选段落；在冻结检索和留出协议后生成跨论文证据矩阵；可选择调用兼容 Chat Completions 接口的外部大模型提炼保守的候选结论；校验它引用的 passage ID 与逐字引文；保留 v0.2 的审查和 Skill 编译功能。
+**v0.3 已实现（仍保留）：** 使用 PyMuPDF 读取**用户合法获取的本地文字型 PDF**，保存页码、段落编号、文本哈希和 PDF 文件哈希；从原文中筛选对应科研要素的候选段落；在冻结检索和留出协议后生成跨论文证据矩阵；可选择调用兼容 Chat Completions 接口的外部大模型提炼保守的候选结论；校验它引用的 passage ID 与逐字引文；保留 v0.2 的审查和 Skill 编译功能。
 
 **v0.3 未实现：** 自动网络检索/批量下载论文、法律意义的全文使用授权检查、扫描 PDF OCR、复杂公式与表格的可靠结构解析、论文元数据在线核验、自动证明科学结论、自动接受规则为可靠事实、真实留出集的系统性评估。**当前所有提取与归纳规则均为未审查候选。**
 
@@ -106,3 +106,96 @@ python -m unittest discover -s tests -v
 ## 设计理念
 
 科研蒸馏不是复制高水平论文的句式，而是从可追溯证据中提炼“在什么条件下、为解决什么问题、怎样设计与验证”的方法规则。当前仅实现科研模式，保留其他领域未来扩展的可能。
+---
+
+## v0.4：从科研信息蒸馏到科研行动与能力评估
+
+**版本定位**：v0.3 仍负责本地 PDF 文献解析与跨论文候选规则；v0.4 额外把经人工核验的科研规则编译为 IF→THEN→BECAUSE→EXCEPT 行动协议，并提供同模型配对盲审、开发集定向修订和隔离测试集。不训练模型权重，不自动宣称能力增长。
+
+### 1. 生成具备行动流程的方向 Skill
+
+在完成 v0.3 的研究证据归纳、人工核查并将对应 rules.json 条目标记为 reviewed 之后：
+
+\`\`\`bash
+python skills/gewu/scripts/gewu_v04.py build my-topic --output my-topic/agent/versions/v1
+\`\`\`
+
+生成的 \`SKILL.md\` 不只是研究结论列表，而包含科研问题界定、可辨识性、可证伪假设、实验对照、证据核对与结论边界六个关卡。它附带规则来源索引和规则文件指纹。没有审核过的规则不能正式构建。
+
+### 2. 创建并冻结新任务基准
+
+\`\`\`bash
+python skills/gewu/scripts/gewu_v04.py init-bench my-topic
+\`\`\`
+
+修改 \`my-topic/evaluation/benchmark.json\` 中 dev/test 的占位问题与独立上下文；任务样例需覆盖文献中未直接给出的新科研问题，并在适用时通过 \`source_paper_ids\` 标识论文来源。先完成 v0.2 的 \`freeze --part evaluation\`，然后：
+
+\`\`\`bash
+python skills/gewu/scripts/gewu_v04.py freeze-bench my-topic
+\`\`\`
+
+冻结后任何问题、维度或分组变更都会使运行拒绝继续，必须创建新版本。不要把测试集问题和其参考答案交给蒸馏模型。
+
+### 3. 同条件比较有无 Skill（可选 API，需授权）
+
+\`\`\`bash
+export OPENAI_API_KEY="配置自己的密钥"
+export GEWU_LLM_MODEL="配置的模型"
+python skills/gewu/scripts/gewu_v04.py run my-topic --split dev --arm baseline \
+  --output my-topic/evaluation/runs/dev-baseline.json --allow-external
+python skills/gewu/scripts/gewu_v04.py run my-topic --split dev --arm skill \
+  --skill my-topic/agent/versions/v1/SKILL.md \
+  --output my-topic/evaluation/runs/dev-skill.json --allow-external
+\`\`\`
+
+运行命令通过兼容 Chat Completions 的模型接口访问外部服务。需保证两组使用同一模型、提供同样的任务上下文；模型输出和提示词指纹会记录到本地。**尚未实际对真实外部科研模型运行这一流程；测试覆盖的是模拟接口和程序不变量。**
+
+### 4. 生成盲审与评分
+
+\`\`\`bash
+python skills/gewu/scripts/gewu_v04.py blind my-topic \
+  --baseline my-topic/evaluation/runs/dev-baseline.json \
+  --skill my-topic/evaluation/runs/dev-skill.json \
+  --packet my-topic/evaluation/grades/dev-blind.json \
+  --mapping my-topic/evaluation/private/dev-map.json
+\`\`\`
+
+将盲审包交给评分者，**不要提供秘密映射文件**。评分文件示例（每个 \`case_id\` 必须覆盖）：
+
+\`\`\`json
+{"grades":[{"case_id":"盲审包内的ID","reviewer":"reviewer-A",
+  "scores":{"evidence":3,"question":4,"experiment":3,"limitations":2}}]}
+\`\`\`
+
+评分完成后：
+
+\`\`\`bash
+python skills/gewu/scripts/gewu_v04.py score \
+  --packet my-topic/evaluation/grades/dev-blind.json \
+  --mapping my-topic/evaluation/private/dev-map.json \
+  --grades my-topic/evaluation/grades/dev-reviewed.json \
+  --output my-topic/evaluation/dev-report.json
+\`\`\`
+
+### 5. 根据 dev 失败生成候选版本，而非偷看 test
+
+写一个修订计划：
+
+\`\`\`json
+{"changes":[{"failure_task_ids":["dev-task-001"],
+"trigger":"资料稀缺且缺少独立外部检验时",
+"new_action":"先检查目标可辨识性，再增加对照与可证伪失败判据",
+"rationale":"开发集盲审指出实验设计缺少失败判据；待进一步验证"}]}
+\`\`\`
+
+\`\`\`bash
+python skills/gewu/scripts/gewu_v04.py evolve my-topic \
+  --base-skill my-topic/agent/versions/v1/SKILL.md \
+  --dev-report my-topic/evaluation/dev-report.json \
+  --revision my-topic/evaluation/revision.json \
+  --output my-topic/agent/versions/v2-candidate
+\`\`\`
+
+\`evolve\` 拒绝 test 报告，不会覆盖 v1；输出带 \`NOT_APPROVED\` 标记。候选版本复测开发集，锁定后**一次性**评价独立 test；不得根据 test 结果在同一测试集上再次调优。此流程不自动判断科研规律的真伪，也不做参数微调。
+
+**当前可验证的改进**是：研究 Skill 的行动流程可执行、任务对照过程可记录、改进与测试分离；至于是否真正提升新研究问题的科学推理质量，需要真实论文、独立任务和人工评价后才能判断。

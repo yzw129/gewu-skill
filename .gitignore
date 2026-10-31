@@ -10,3 +10,7 @@ __pycache__/
 **/analysis/
 **/generated_skill/
 **/*.pdf
+
+# v0.4: local evaluation tasks, runs, grader identities and generated agent variants
+**/evaluation/
+**/agent/
