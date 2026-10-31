@@ -1,46 +1,65 @@
 ---
 name: gewu
-description: 科研方向知识与研究方法蒸馏。用户希望从真实论文中梳理科学问题、实验设计、证据、研究分歧或生成可审查的方向 Skill 时使用。v0.3 支持本地 PDF 证据解析与跨论文候选规则分析。
+description: 从科研方向的代表性论文中提取证据、研究问题和方法规则，将核实后的条件性规则转化为可执行科研推理协议，并通过同模型配对盲审与开发集反馈迭代。用于科研蒸馏、研究设计、科学论证、能力评测和科研 Skill 改进。
 metadata:
-  version: "0.3.0"
+  version: "0.4.0"
 ---
 
-# GEWU · 格物 — 科研蒸馏
+# GEWU · 格物 — 科研推理与能力蒸馏
 
-## 目标
+## 核心定位
 
-围绕**研究方向**而不是目标期刊，在真实文献中提取科学问题、方法选择、实验/评价设计、证据和反例，生成可审查的条件性科研规则。先形成研究贡献，再做期刊匹配。当前不实现人物或组织蒸馏。
+**蒸馏目标是可迁移的科研判断与行动方法，而非只提取领域信息。** 固定主链：
+真实文献 → 可定位证据 → 条件性科研规则 → 行动协议 → 新任务对照评估 → 开发集反馈修订 → 独立测试。
 
-## 工作顺序
+这不是基础模型的权重训练。称“能力提升”必须有未参与调优的任务上的同条件比较结果。
 
-1. 明确方向、数据与研究边界；制定检索、纳排、留出集与评价协议（`references/workflow.md`）。
-2. 确保 PDF 来源合法且题录可核验；使用 `scripts/gewu_v03.py ingest` 解析本地 PDF，保留页码、段落 ID 与 SHA256。
-3. 使用 `scripts/gewu_v03.py extract` 从原文定位研究问题、假设、数据、方法、基线、评价、结果和局限。无模型模式**只找原文候选片段**；模型模式也只能产出待审查解释。参见 `references/extraction.md`。
-4. 在规则归纳前冻结综合集/留出集划分以及检索与评价协议；使用 `scripts/gewu_v03.py synthesize` 输出跨论文证据矩阵；在显式允许外部模型服务后可选择生成候选科研规则（`references/distillation.md`）。
-5. 人工逐条核对原始 PDF 中的定位和引文、证据是否支持模型解释、是否有反例与遗漏变量；再使用旧脚本 `scripts/gewu.py check` 和 `compile` 生成方向 Skill。
-6. 使用未参与蒸馏的论文和预注册指标完成独立测试；结果不理想时不可静默调整条件和评价方式（`references/validation.md`）。
+## 阶段 A：文献与证据（v0.3）
 
-## 使用边界
+1. 以**研究方向**而非期刊为对象；明确研究目标、范围、筛选规则、数据许可与纳排；按 references/workflow.md 冻结协议。
+2. 使用 scripts/gewu_v03.py 从合法获得的文字型 PDF 中提取带页码、片段 ID 和哈希的原文证据。
+3. 提取科学问题、假设、方法、数据、基线、评价、结果与局限；任何引文必须能在对应原文中定位。
+4. 比较论文之间的条件差异、争议与反例，生成带证据的 **candidate** 规则；不得把摘要解读当全文实验事实。
+5. 规则只有在人工检查证据、记录反例和标注 reviewed 后，才能进入正式行动 Skill。v0.2 的脚本 scripts/gewu.py 执行结构核查与审查门禁。
 
-- **未检索**：不能说检索了文献；**只有摘要**：不能推断具体实验；**有 PDF 文本**：仍要核查复杂排版和公式。
-- 模型提供的科学理解是候选解释，逐字引文匹配只是结构核查；**不是证据充分性验证**。
-- 未经人工审查时禁止把候选规则发布为已经验证的技能；未经验证的内容必须明确标注。
-- 留出论文绝不能进入方法规则归纳，也不得用测试表现反向挑选规则。
-- 将 PDF 内容发送到外部模型前需征得授权，命令行使用 `--allow-external` 显式批准。
-- 支持证据与反面证据都应保留；不能把两篇论文的结论差异抹平为共识。
+## 阶段 B：科研思维蒸馏（v0.4）
 
-## 命令入口
+读取 references/reasoning-protocol.md。将审查过的规则编译成 IF（任务条件）→ THEN（科研行动）→ BECAUSE（证据/机制）→ EXCEPT（限制/反例），而不是简单列出论文结论。执行六个研究关卡：
 
-详情见仓库 `README.md`：
+- 研究对象/问题/尺度/目标变量界定；
+- 可辨识性和物理/统计约束；
+- 可证伪假设与竞争解释；
+- 数据、基线、消融、预注册评价及失败判据；
+- 原文证据、冲突结果和遗漏变量核查；
+- 科学结论与适用边界。
 
-```bash
-python skills/gewu/scripts/gewu.py init my-topic --topic "研究方向"
-python skills/gewu/scripts/gewu_v03.py ingest my-topic --pdf paper.pdf --id p1 --title "论文题名"
-python skills/gewu/scripts/gewu_v03.py extract my-topic --id p1
-python skills/gewu/scripts/gewu.py freeze my-topic --part protocol
-python skills/gewu/scripts/gewu.py freeze my-topic --part evaluation
-python skills/gewu/scripts/gewu_v03.py synthesize my-topic
-python skills/gewu/scripts/gewu.py check my-topic
-```
+使用 scripts/gewu_v04.py build 生成方向科研 Skill；如果没有已人工核对的规则，必须停止并指出缺口，不能伪装成已蒸馏能力。
 
-运行前必须实填冻结协议，留出论文在蒸馏前确定。上述命令不包含外部模型调用，默认不能自动总结论文结论。已有 v0.2 项目继续兼容。
+## 阶段 C：能力评价与迭代（v0.4）
+
+遵循 references/evaluation-loop.md：
+
+1. 先建立开发集与独立测试集，冻结问题、评分标准、模型和实验比较规则；v0.4 的 freeze-bench 提供防篡改检查。
+2. 同一模型、同一输入资料、相同参数下比较 baseline 和 skill 两组；只改变是否加载行动协议。
+3. 输出匿名盲审包，研究者按**事实与证据、科学问题、实验设计、反例与边界**四项独立评分。
+4. 仅根据开发集失败案例提出具体的行为协议修正；evolve 输出未批准候选新版本，不覆盖正式 Skill。
+5. 候选版本可在开发集上复测；最终一次性独立测试集仅用于确认效果，不得依据其结果继续调优同一测试集。
+
+## 硬性边界
+
+- 模型参数不变；Skill 迭代 ≠ 模型微调。
+- 程序检查、引文逐字匹配、人工核对与独立效果验证是四个不同层级。
+- 所有行为修正与科学判断区分开：开发集反馈只能成为**待验证方法假设**，不能成为新文献事实。
+- 相同材料交给 baseline 与 skill；禁止给 skill 独有的答案信息。
+- 不虚构文献、DOI、实际实验、验证分数或期刊接受率。
+- 执行 API 调用前必须明确许可与 --allow-external；研究者资料及回答结果保存在本地。
+- 明确报告技能已生成、尚未验证、验证通过或失败，不以自我评价代替外部证据。
+
+## 命令与材料
+
+- 文献：scripts/gewu.py、scripts/gewu_v03.py
+- 推理与进化：scripts/gewu_v04.py
+- 协议：references/reasoning-protocol.md、references/evaluation-loop.md
+- 完整示例和工作流：仓库 README.md
+
+当前只开发科研蒸馏，其他应用以后按相同“证据—方法—验证”原则扩展。
