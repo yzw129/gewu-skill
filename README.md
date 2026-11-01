@@ -199,3 +199,22 @@ python skills/gewu/scripts/gewu_v04.py evolve my-topic \
 \`evolve\` 拒绝 test 报告，不会覆盖 v1；输出带 \`NOT_APPROVED\` 标记。候选版本复测开发集，锁定后**一次性**评价独立 test；不得根据 test 结果在同一测试集上再次调优。此流程不自动判断科研规律的真伪，也不做参数微调。
 
 **当前可验证的改进**是：研究 Skill 的行动流程可执行、任务对照过程可记录、改进与测试分离；至于是否真正提升新研究问题的科学推理质量，需要真实论文、独立任务和人工评价后才能判断。
+
+
+## v0.4.1 外部科研 Skill 方法借鉴与三组比较
+
+相关项目及源代码检查记录见 `skills/gewu/references/related-skills.md`，重点吸收原子文献档案、假设与竞争解释、实验设计和主张审查，而非直接复制 Skill。
+
+与原来的双组对照相比，新脚本 `skills/gewu/scripts/gewu_eval_v041.py` 支持三组：`baseline`（无补充资料）、`retrieval`（固定证据资料）、`skill`（相同资料+研究协议）。重点比较 skill 与 retrieval，避免把单纯获得新文献的收益误归因于科研方法蒸馏。
+
+典型调用（先使用 v0.4 的 `freeze-bench` 冻结评估题目和评分）：
+
+```bash
+python skills/gewu/scripts/gewu_eval_v041.py run my-topic --split dev --arm baseline --output base.json --allow-external
+python skills/gewu/scripts/gewu_eval_v041.py run my-topic --split dev --arm retrieval --evidence-pack evidence.md --output retrieval.json --allow-external
+python skills/gewu/scripts/gewu_eval_v041.py run my-topic --split dev --arm skill --evidence-pack evidence.md --skill my-topic/agent/versions/v1/SKILL.md --output skill.json --allow-external
+python skills/gewu/scripts/gewu_eval_v041.py blind my-topic --baseline base.json --retrieval retrieval.json --skill skill.json --packet blinded.json --mapping secret.json
+python skills/gewu/scripts/gewu_eval_v041.py score --packet blinded.json --mapping secret.json --grades human_grades.json --output paired_report.json
+```
+
+调用外部模型需要明确授权，并配置与 v0.4 相同的 API 环境变量。没有模型调用和实际人工评分，不能称评估已经验证。评分采用现有 v0.4 四维标准；`evolve` 仍只接收旧双组格式，**v0.4.1 三组评分报告不会自动接入进化模块**，需进一步开发适配，禁止误称闭环已全部打通。

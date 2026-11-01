@@ -63,3 +63,7 @@ metadata:
 - 完整示例和工作流：仓库 README.md
 
 当前只开发科研蒸馏，其他应用以后按相同“证据—方法—验证”原则扩展。
+
+## 外部科研 Skill 方法借鉴与评估升级
+
+采用经独立梳理的外部技能方法机制，详见 `references/related-skills.md`。评估优先使用 `scripts/gewu_eval_v041.py` 三组模式（无证据基线、相同证据、相同证据+行动 Skill），以 `skill − retrieval` 判断流程贡献。该功能只检查实验记录和人工评分，不声称模型权重成长。
