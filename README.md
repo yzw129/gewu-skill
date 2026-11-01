@@ -270,3 +270,8 @@ python skills/gewu/scripts/gewu_eval_v041.py score --packet blinded.json --mappi
 ## 优先级 1：经验反馈试验（v0.4-EXP1）
 
 脚本 `skills/gewu/scripts/gewu_experience.py` 支持将已经过外部验证的科研经验加入对照组，并对 10 个真实历史科研任务逐项记录尝试、外部判定、修改次数与 token 估算成本。每轮评估先冻结任务和经验，失败需外部反馈才能修订；不能从结果中自动宣称模型变强。候选任务清单和具体步骤见 `skills/gewu/references/experience-feedback.md`。
+
+
+## 真实历史任务预检
+
+新增 `skills/gewu/scripts/gewu_history_preflight.py`，在真正执行十任务回放前检查原稿、修订稿 SHA256、文件格式、逐字原始提示词及来源。必须认识到旧 `gewu_experience.py run` 是纯文本调用接口，无法自动完成 Word、Excel、PPT 的实际文件任务。详情见 `skills/gewu/references/experience-feedback.md`。2026-11-01 完成的私人档案整理不等于真实 A/B 评估或技能进化结果。
