@@ -40,3 +40,13 @@ C（skill）：与 B 使用**字节相同的证据包**，再加载科研行动�
 2. 科研方法卡：IF/THEN/BECAUSE/EXCEPT/CHECK 加实验单位、混杂因素、转移条件和置信度。
 3. 双人独立评审一致性、多个随机种子与效应不确定性。
 4. 知识增益与流程增益的跨方向迁移验证。
+
+## v0.5 写作、绘图与汇报的参考机制
+
+- [Scientific Writing](https://github.com/K-Dense-AI/scientific-agent-skills/blob/main/skills/scientific-writing/SKILL.md)：证据驱动写作与数据一致性核验。
+- [Scientific Visualization](https://github.com/K-Dense-AI/scientific-agent-skills/blob/main/skills/scientific-visualization/SKILL.md)：可追溯数据、无误导可视编码、可复现导出。
+- [Scientific Schematics](https://github.com/K-Dense-AI/scientific-agent-skills/blob/main/skills/scientific-schematics/SKILL.md)：机制图的概念准确性与生成后检查，需另外关注编辑性。
+- [Scientific Slides](https://github.com/K-Dense-AI/scientific-agent-skills/blob/main/skills/scientific-slides/SKILL.md)：内容组织、视觉检验及原生演示资产。
+- [Matplotlib](https://github.com/K-Dense-AI/scientific-agent-skills/blob/main/skills/matplotlib/SKILL.md)：可复现程序化绘图与输出格式选择。
+
+**借鉴的是方法机制与验证原则，不等于复制这些项目或已完成其全部功能。**

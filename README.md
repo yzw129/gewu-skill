@@ -1,4 +1,51 @@
-# Gewu Skills · 格物（Research Edition v0.4）
+# Gewu Skills · 格物（通用能力蒸馏 v0.5）
+
+> **定位升级**：通用能力蒸馏与验证引擎。第一批模块为科研推理、学术写作、科学绘图、学术汇报。核心框架负责来源、规则、审查、冻结和编译，各领域模块拥有独立的执行方法与评价标准。
+
+**注意**：v0.5 新增的是跨领域能力卡与编译器，并没有自动学会写论文、画图、制作 PPT，也没有训练基础模型参数。源码/流程的结构测试通过，不等于真实作品或能力迁移已被验证。
+
+## 通用能力卡操作
+
+```bash
+# 为论文写作建立能力蒸馏项目；其他可用 research / visualization / presentation
+python skills/gewu/scripts/gewu_capabilities.py init my-writing --id paper-writing --domain writing
+
+# 填写 my-writing/capability.json 中真实来源、证据、候选规则和检查方法
+# 在 my-writing/evaluation.json 中替换开发集与测试集的占位任务
+python skills/gewu/scripts/gewu_capabilities.py check my-writing
+python skills/gewu/scripts/gewu_capabilities.py freeze my-writing
+
+# candidate 规则只能生成明确标记的未核查预览
+python skills/gewu/scripts/gewu_capabilities.py compile my-writing --preview --output my-writing/preview
+
+# 每条来源完成审查，规则标记 reviewed 后才允许正式编译
+python skills/gewu/scripts/gewu_capabilities.py compile my-writing --output my-writing/skill-v1
+```
+
+**数据契约**：`capability.json` 保存领域、来源（含使用权限）、能力规则及状态；`evaluation.json` 保存领域专属评价维度、开发集与独立测试集。规则字段为 IF/THEN/BECAUSE/EXCEPT/CHECK。`evaluation.lock.json` 锁定评价计划指纹。
+
+## 领域能力模块
+
+- [科研推理](skills/gewu/domains/research/SKILL.md)
+- [学术写作](skills/gewu/domains/writing/SKILL.md)
+- [科学绘图](skills/gewu/domains/visualization/SKILL.md)
+- [学术汇报](skills/gewu/domains/presentation/SKILL.md)
+
+统一契约见 [能力模块与评估协议](skills/gewu/references/capability-model.md)。
+
+## 和旧版本的关系
+
+- v0.3：科研文献 PDF 的证据提取；
+- v0.4：科研推理协议、开发/测试分离；
+- v0.4.1：科研三组对照，区分文献知识和方法指令的效果；
+- **v0.5**：新增跨领域模块，允许写作、绘图、学术汇报作为不同种类的待蒸馏能力。
+
+**兼容性**：旧版 `gewu.py`、`gewu_v03.py`、`gewu_v04.py`、`gewu_eval_v041.py` 不移除，科研研究项目数据结构保持原样；新领域使用独立能力项目格式，尚未实现旧科研项目自动迁移。
+
+---
+
+## v0.4.1 及之前的科研流程（历史操作说明）
+
 
 > **目标：科研方向蒸馏。** 方向文献 → 带页码的 PDF 证据 → 科研问题/方法候选 → 跨论文证据比较 → 有条件的候选规则 → 人工核对 → 方向专属 Skill。期刊选择在研究贡献形成之后。
 
