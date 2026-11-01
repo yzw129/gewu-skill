@@ -107,7 +107,7 @@ class TestExperienceFeedback(unittest.TestCase):
         r=e.evaluate(runs,self.tasks,self.p,self.lock,e.validated_experiences(self.exp,self.tasks),self.skill.read_text())
         self.assertFalse(r["externally_reported_pilot_improvement"])
     def test_success_cannot_be_revised(self):
-        runs=self.make_runs()
+        runs=self.make_runs(good=False)
         a=runs[0]
         a["attempts"].append(dict(a["attempts"][0],number=2))
         with self.assertRaisesRegex(ValueError,"成功后"):e.evaluate(runs,self.tasks,self.p,self.lock,e.validated_experiences(self.exp,self.tasks),self.skill.read_text())
