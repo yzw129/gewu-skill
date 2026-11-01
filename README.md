@@ -275,3 +275,19 @@ python skills/gewu/scripts/gewu_eval_v041.py score --packet blinded.json --mappi
 ## 真实历史任务预检
 
 新增 `skills/gewu/scripts/gewu_history_preflight.py`，在真正执行十任务回放前检查原稿、修订稿 SHA256、文件格式、逐字原始提示词及来源。必须认识到旧 `gewu_experience.py run` 是纯文本调用接口，无法自动完成 Word、Excel、PPT 的实际文件任务。详情见 `skills/gewu/references/experience-feedback.md`。2026-11-01 完成的私人档案整理不等于真实 A/B 评估或技能进化结果。
+
+
+## 真实历史经验蒸馏候选导入
+
+通过比对合法持有的历史原稿、修订稿和修改反馈，将候选方法整理为 IF/THEN/BECAUSE/EXCEPT/CHECK 规则卡。**蒸馏过的任务是学习集，不能再当作本批经验的独立测试题。**
+
+本仓库只包含转换器，不包含用户的私人历史内容：
+
+\`\`\`bash
+python skills/gewu/scripts/gewu_history_distill.py \
+  --cards /private/candidate_experiences.private.json \
+  --output /private/experiences.candidate.json \
+  --excluded-task-ids HOLDOUT-01,HOLDOUT-02
+\`\`\`
+
+导入结果的经验状态全部为 \`candidate\` 且外部审核 \`pending\`；不能直接进入 \`gewu_experience.py\` 的 verified_memory 组。先核对证据、实际错误与适用边界，取得有记录的独立人工判断，再对未见任务进行真实执行和成本评测。不得把修订稿默认当作正确参考答案。
