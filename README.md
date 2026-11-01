@@ -265,3 +265,8 @@ python skills/gewu/scripts/gewu_eval_v041.py score --packet blinded.json --mappi
 ```
 
 调用外部模型需要明确授权，并配置与 v0.4 相同的 API 环境变量。没有模型调用和实际人工评分，不能称评估已经验证。评分采用现有 v0.4 四维标准；`evolve` 仍只接收旧双组格式，**v0.4.1 三组评分报告不会自动接入进化模块**，需进一步开发适配，禁止误称闭环已全部打通。
+
+
+## 优先级 1：经验反馈试验（v0.4-EXP1）
+
+脚本 `skills/gewu/scripts/gewu_experience.py` 支持将已经过外部验证的科研经验加入对照组，并对 10 个真实历史科研任务逐项记录尝试、外部判定、修改次数与 token 估算成本。每轮评估先冻结任务和经验，失败需外部反馈才能修订；不能从结果中自动宣称模型变强。候选任务清单和具体步骤见 `skills/gewu/references/experience-feedback.md`。
